@@ -1,165 +1,188 @@
-const Manager = require("./lib/Manager");
-const Engineer = require("./lib/Engineer");
-const Intern = require("./lib/Intern");
-const inquirer = require("inquirer");
-const path = require("path");
-const fs = require("fs");
+var mysql = require("mysql");
+var inquirer = require("inquirer");
+var cTable = require("console.table")
 
-const OUTPUT_DIR = path.resolve(__dirname, "output");
-const outputPath = path.join(OUTPUT_DIR, "team.html");
+var connection = mysql.createConnection({
+  host: "localhost",
 
-const render = require("./lib/htmlRenderer");
+  port: 3306,
 
-const teamArr = [];
-console.log(teamArr);
-
-
-const responseManager = [
-  {
-    type: "input",
-    message: "What is the manager's name?",
-    name: "name"
-  },
-  {
-    type: "input",
-    message: "What is the manager's ID?",
-    name: "id"
-  },
-  {
-    type: "input",
-    message: "What is the manager's Email?",
-    name: "email"
-  },
-  {
-    type: "input",
-    message: "What is the manager's office number?",
-    name: "officeNumber"
-  }
-];
-
-const responseEngineer = [
-  {
-    type: "input",
-    message: "What is the engineer's name?",
-    name: "name"
-  },
-  {
-    type: "input",
-    message: "What is the engineer's ID?",
-    name: "id"
-  },
-  {
-    type: "input",
-    message: "What is the engineer's Email?",
-    name: "email"
-  },
-  {
-    type: "input",
-    message: "What is the engineer's Github username?",
-    name: "github"
-  }
-];
-
-const responseIntern = [
-  {
-    type: "input",
-    message: "What is the intern's name?",
-    name: "name"
-  },
-  {
-    type: "input",
-    message: "What is the intern's ID?",
-    name: "id"
-  },
-  {
-    type: "input",
-    message: "What is the intern's Email?",
-    name: "email"
-  },
-  {
-    type: "input",
-    message: "What is the intern's school?",
-    name: "school"
-  }
-];
-
-
-function promptManager() {
-    inquirer
-      .prompt(responseManager)
-      .then(function (input) {
-        const manager = new Manager(input.name, input.id, input.email, input.officeNumber)
-        teamArr.push(manager);
-
-        addEmployee();
-      });
-  }
   
-  
-  function promptEngineer() {
-    inquirer
-      .prompt(responseEngineer)
-      .then(function (input) {
-        const engineer = new Engineer(input.name, input.id, input.email, input.gitName)
-        teamArr.push(engineer);
-
-        addEmployee();
-      });
-  }
-
-  function promptIntern() {
-    inquirer
-      .prompt(responseIntern)
-      .then(function (input) {
-        const intern = new Intern(input.name, input.id, input.email, input.school);
-        teamArr.push(intern);
-
-        addEmployee();
-      });
-  }
+  user: "root",
 
  
+  password: "Fieldy23!",
+  database: "appdb"
+  
+});
 
-  function addEmployee() {
+connection.connect(function(err) {
+  if (err) throw err;
+  runSearch();
+});
 
-    const addEmployee = [
-      {
-        type: "list",
-        message: "Which employee would you like to add?",
-        name: "role",
-        choices: [
-          "Manager",
-          "Engineer",
-          "Intern",
-          "Finish"
-        ]
-      }];
+function runSearch() {
+  inquirer
+    .prompt({
+      name: "action",
+      type: "rawlist",
+      message: "What would you like to do?",
+      choices: [
+        "View All Employees",
+        "View All Employees By Department",
+        "View All Employees By Role",
+        "Add Employee",
+        "Add Department",
+        "Add Role",
+        "Update Employee Role",
+      ]
+    })
+  
+    .then(function(answer) {
+      switch (answer.action) {
+      case "View All Employees":
+        allEmployees();
+        break;
 
-    inquirer
-      .prompt(addEmployee)
-      .then(function (input) {
+      case "View All Employees By Department":
+        allEmployeesByDepartment();
+        break;
 
-        if (input.role === "Manager") {
-          promptManager();
-        }
-        if (input.role === "Engineer") {
-          promptEngineer();
-        }
-        if (input.role === "Intern") {
-          promptIntern();
-        }
-        else if (input.role === "Finish") {
-          
-       const teamHTML = render(teamArr);
+      case "View All Employees By Role":
+        allEmployeesByRole();
+        break;
 
-        fs.writeFile(outputPath, teamHTML, (err) => {
-        
-        if (err) {
-        }
-        });
-        
-      } 
+      case "Add Employee":
+        addEmployee();
+        break;
+
+      case "Add Department":
+        addDepartment();
+        break;
+
+      case "Add Role":
+        addRole();
+        break;
+
+      case "Update Employee Role":
+        updateEmployeeRole();
+        break;
+
+      }
+    });
+}
+
+function allEmployees() {
+  cTable
+    
+      var query = "SELECT * FROM info";
+      connection.query(query, function(err, res) {
+      console.table(res);
+ 
+        runSearch();
       });
-  }
+}
 
-  addEmployee();
+function allEmployeesByDepartment() {
+  cTable
+  
+  var query = "SELECT * FROM info GROUP BY department_id";
+  connection.query(query, function(err, res) {
+  console.table(res);
+    
+    runSearch();
+  });
+}
+
+  function allEmployeesByRole() {
+    cTable
+    
+    var query = "SELECT * FROM info GROUP BY role_id";
+    connection.query(query, function(err, res) {
+    console.table(res);
+      
+      runSearch();
+    });
+}
+
+function addEmployee() {
+  inquirer
+    .prompt(responseEmployee)
+    .then(function (input) {
+      const employee = new employee (input.firstName, input.lastName, input.role, input.manager)
+      
+
+      runSearch();
+    });
+}
+
+function addDepartment() {
+  inquirer
+    .prompt(responseDepartment)
+    .then(function (input) {
+      const department = new department (input.firstName, input.lastName, input.role, input.manager)
+      
+
+      runSearch();
+    });
+}
+
+function addRole() {
+  inquirer
+    .prompt(responseRole)
+    .then(function (input) {
+      const role = new role (input.firstName, input.lastName, input.role, input.manager)
+      
+
+      runSearch();
+    });
+}
+
+const responseEmployee = [
+  {
+    type: "input",
+    message: "What is the employee's first name?",
+    name: "first name"
+  },
+  {
+    type: "input",
+    message: "What is the employee's last name?",
+    name: "last name"
+  },
+  {
+    type: "input",
+    message: "What is the employee's role's ID?",
+    name: "role"
+  },
+  {
+    type: "input",
+    message: "What is the employee's manager's ID?",
+    name: "manager"
+  }
+];
+
+const responseDepartment = [
+  {
+    type: "input",
+    message: "What is the department's name?",
+    name: "name"
+  }
+];
+
+const responseRole = [
+  {
+    type: "input",
+    message: "What is the role's title?",
+    name: "title"
+  },
+  {
+    type: "input",
+    message: "What is the role's salary?",
+    name: "salary"
+  },
+  {
+    type: "input",
+    message: "What is the role's department?",
+    name: "department"
+  },
+];
